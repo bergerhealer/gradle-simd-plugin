@@ -44,6 +44,10 @@ public class SimdPlugin implements Plugin<Project> {
                 .getByType(JavaPluginExtension.class)
                 .getSourceSets();
 
+        SourceSet simd = sourceSets.create(extension.getSourceSetName().get());
+        simd.getJava().srcDir(extension.getSourceDir());
+        simd.getOutput().dir(extension.getOutputDir());
+
         project.afterEvaluate(p -> {
             extension.getSourceSetName().finalizeValue();
             extension.getReleaseVersion().finalizeValue();
