@@ -9,7 +9,7 @@ version = "1.0.0"
 gradlePlugin {
     plugins {
         create("simdPlugin") {
-            id = "com.bergerkiller.simd"
+            id = "com.bergerkiller.gradle.simd"
             implementationClass = "com.bergerkiller.gradle.simd.SimdPlugin"
         }
     }

@@ -12,7 +12,7 @@ The classes are also automatically added to the **shadowjar** plugin, which can 
 #### build.gradle.kts
 ```kts
 plugins {
-    id("com.bergerkiller.simd") version "1.0.0"
+    id("com.bergerkiller.gradle.simd") version "1.0.0"
 }
 ```
 
