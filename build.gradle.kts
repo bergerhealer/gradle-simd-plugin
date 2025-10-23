@@ -6,10 +6,6 @@ plugins {
 group = "com.bergerkiller.gradle"
 version = "1.0.0"
 
-dependencies {
-    compileOnly("com.github.johnrengelman.shadow:shadow:8.1.1")
-}
-
 gradlePlugin {
     plugins {
         create("simdPlugin") {
@@ -30,7 +26,6 @@ java {
 }
 
 repositories {
-    maven("https://jitpack.io")
     mavenCentral()
 }
 

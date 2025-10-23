@@ -1,10 +1,11 @@
 package com.bergerkiller.gradle.simd;
 
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.GradleException;
+import org.gradle.api.file.FileTree;
 import org.gradle.api.plugins.JavaPluginExtension;
+import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.compile.JavaCompile;
@@ -14,6 +15,8 @@ import org.gradle.api.tasks.TaskProvider;
 import org.gradle.jvm.tasks.Jar;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -97,11 +100,19 @@ public class SimdPlugin implements Plugin<Project> {
             // We cannot put our simd classes along in the same set as that would cause weird problems
             // This could technically also be done by the projects that use this plugin
             if (extension.getIncludeInShadowJar().get()) {
-                project.getTasks().named("shadowJar", ShadowJar.class).configure(shadowJar -> {
+                project.getTasks().named("shadowJar").configure(shadowJar -> {
                     shadowJar.dependsOn(compileSimd);
-                    shadowJar.from(extension.getOutputDir().map(dir ->
+
+                    Provider<FileTree> simdClassTree = extension.getOutputDir().map(dir ->
                             project.fileTree(dir.getAsFile()).matching(pattern -> pattern.include("**/*.class"))
-                    ));
+                    );
+
+                    try {
+                        Method fromMethod = shadowJar.getClass().getMethod("from", Object[].class);
+                        fromMethod.invoke(shadowJar, (Object) (new Object[] { simdClassTree }));
+                    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                        throw new UnsupportedOperationException("Could not add simd classes to shadowJar", e);
+                    }
                 });
             }
         });
