@@ -3,6 +3,7 @@ package com.bergerkiller.gradle.simd;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.GradleException;
+import org.gradle.api.Task;
 import org.gradle.api.file.FileTree;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.provider.Provider;
@@ -100,7 +101,8 @@ public class SimdPlugin implements Plugin<Project> {
             // We cannot put our simd classes along in the same set as that would cause weird problems
             // This could technically also be done by the projects that use this plugin
             if (extension.getIncludeInShadowJar().get()) {
-                project.getTasks().named("shadowJar").configure(shadowJar -> {
+                Task shadowJar = project.getTasks().findByName("shadowJar");
+                if (shadowJar != null) {
                     shadowJar.dependsOn(compileSimd);
 
                     Provider<FileTree> simdClassTree = extension.getOutputDir().map(dir ->
@@ -113,7 +115,7 @@ public class SimdPlugin implements Plugin<Project> {
                     } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
                         throw new UnsupportedOperationException("Could not add simd classes to shadowJar", e);
                     }
-                });
+                }
             }
         });
     }
