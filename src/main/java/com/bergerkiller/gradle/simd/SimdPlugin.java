@@ -84,7 +84,7 @@ public class SimdPlugin implements Plugin<Project> {
             // Hook into test
             project.getTasks().named("test", Test.class).configure(test -> {
                 test.dependsOn(compileSimd);
-                test.setJvmArgs(Collections.singletonList("--add-modules=jdk.incubator.vector"));
+                // test.setJvmArgs(Collections.singletonList("--add-modules=jdk.incubator.vector"));
                 test.setClasspath(test.getClasspath().plus(
                         project.files(compileSimd.get().getDestinationDirectory())
                 ));
