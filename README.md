@@ -9,11 +9,15 @@ The classes are also automatically added to the **shadowjar** plugin, which can 
 
 ## Usage
 ### Add the plugin
+#### build.gradle.kts
 ```kts
 plugins {
     id("com.bergerkiller.simd") version "1.0.0"
 }
+```
 
+#### settings.gradle.kts
+```kts
 pluginManagement {
     repositories {
         maven("https://ci.mg-dev.eu/plugin/repository/everything/")
