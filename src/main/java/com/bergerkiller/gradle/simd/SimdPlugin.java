@@ -44,7 +44,10 @@ public class SimdPlugin implements Plugin<Project> {
                 .getByType(JavaPluginExtension.class)
                 .getSourceSets();
 
-        SourceSet simd = sourceSets.create(extension.getSourceSetName().get());
+        // Note: this source set is not actually linked up with anything, because that breaks class paths
+        // Instead, this source set exists exclusively to tell your IDE what classes/libraries are visible
+        // inside your SIMD sources. It has no effect whatsoever on actual compilation.
+        final SourceSet simd = sourceSets.create(extension.getSourceSetName().get());
         simd.getJava().srcDir(extension.getSourceDir());
         simd.getOutput().dir(extension.getOutputDir());
 
@@ -54,6 +57,25 @@ public class SimdPlugin implements Plugin<Project> {
             extension.getSourceDir().finalizeValue();
             extension.getOutputDir().finalizeValue();
             extension.getIncludeInShadowJar().finalizeValue();
+
+            final SourceSet main = project.getExtensions()
+                    .getByType(JavaPluginExtension.class)
+                    .getSourceSets()
+                    .getByName("main");
+
+            // Make simd compile classpath include main output + compile classpath
+            simd.setCompileClasspath(
+                    simd.getCompileClasspath()
+                            .plus(main.getOutput())
+                            .plus(main.getCompileClasspath())
+            );
+
+            // Optionally, make simd runtime classpath include main runtime
+            simd.setRuntimeClasspath(
+                    simd.getRuntimeClasspath()
+                            .plus(main.getOutput())
+                            .plus(main.getRuntimeClasspath())
+            );
 
             // Register SIMD compile task
             TaskProvider<JavaCompile> compileSimd = project.getTasks().register("compileSimd", JavaCompile.class, task -> {
@@ -67,11 +89,6 @@ public class SimdPlugin implements Plugin<Project> {
                     project.getLogger().warn("SIMD source directory does not exist: {}", simdDir);
                 }
                 task.setSource(simdDir);
-
-                SourceSet main = project.getExtensions()
-                        .getByType(JavaPluginExtension.class)
-                        .getSourceSets()
-                        .getByName("main");
 
                 task.setClasspath(main.getCompileClasspath().plus(main.getOutput()));
                 task.getDestinationDirectory().set(extension.getOutputDir());
